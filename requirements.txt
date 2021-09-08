@@ -1,0 +1,5 @@
+discord.py
+fandom-py
+wikipedia
+google
+beautifulsoap4
