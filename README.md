@@ -7,5 +7,6 @@ I'm planning on adding searching feature and some more advanced python technolog
 Despite The Version of JavaScript, python command will be implemented to be HAVE NO NSFW IN THEIR ANY COMMAND
 
 # how to install?
-git clone https://github.com/syaLikReposCode/Ultimate-Lite-Botpy.githttps://
+git clone https://github.com/syaLikReposCode/Ultimate-Lite-Botpy.git
+
 gh repo clone syaLikReposCode/Ultimate-Lite-Botpy
