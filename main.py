@@ -281,40 +281,6 @@ async def googleris(ctx):
          await ctx.send("If you found anything you don't understand regardless commands, please report to the Creator, that  would help me"+
          " for this bot development! thank you for understanding!")
          print(url)  
-@client.command()
-async def guilds(ctx):
- try:
-  if ctx.message.author.id == 699459343602679848:
-   for guild in client.guilds:
-     embed=Discord.Embed(
-       title=str(guild),
-       color=0xD8BFD8
-     )
-     embed.set_thumbnail(url=guild.icon_url) 
-     embed.add_field(name="Guild Owner: ", value=guild.owner, inline=False)
-     embed.add_field(name="Guild Members: ", value=guild.member_count, inline=False)
-     embed.add_field(name="Guild ID:", value=guild.id,inline=False)
-     embed.add_field(name="Created: ", value=guild.created_at,inline=False)
-     await ctx.send(embed=embed)
-  else:
-   await ctx.send("this command is for creator only, please ask this bot creator to whitelist you")
- except Exception as e:
-   print(e)
-   await ctx.send("having error while fetching data")
-@client.command(pass_context=True)
-async def ask(ctx, *, message: str):
-   spacing = message.replace(' ', '+')
-   url=f"https://www.botlibre.com/rest/api/form-chat?&application={os.getenv('ID')}&instance=165&message={spacing}"
-   req = requests.get(url=url)
-
-   f = open("result.xml", "w")
-   f.write(req.text)
-   f.close()
-
-   sleep(2)
-   trees=ET.parse('result.xml')
-   root = trees.getroot() 
-   x = root.findtext("message")
-   await ctx.send(x)
+ 
 keep_alive()
 client.run(os.getenv('TOKEN'))
