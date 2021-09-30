@@ -1,5 +1,6 @@
 import discord as Discord
 import os
+import xml.etree.ElementTree as ET
 import wikipedia
 try:
  from googlesearch import search
@@ -9,15 +10,22 @@ from asyncio import TimeoutError
 import fandom
 from random import randint
 from server import keep_alive
+import requests
 from discord.ext import commands
+import json
+from time import sleep
 
 prefix = "f"
-client = commands.Bot(command_prefix=prefix)
+intents = Discord.Intents.default()  
+intents.members = True
+client = commands.Bot(command_prefix=prefix, intents=intents)
 client.remove_command('help')
  
 @client.event
 async def on_ready():
   print("Logged in and register as {0.user}".format(client) + " With FORCE!") 
+  #await client.change_presence(activity=Discord.Activity(type=Discord.ActivityType.listening, name="javascript command turned off (like tncode) , because discord recently releasing new version api and going to full rewrite"))
+  await client.change_presence(status=Discord.Status.idle)
 @client.event
 async def on_message(message):
   if client.user.mentioned_in(message):
@@ -40,8 +48,7 @@ async def help(ctx):
        title=":snake: python command",
        color = i
         )
- embed.add_field(name=":question: General", value="Help, py", inline=True)
- embed.add_field(name=":mag: Searching", value="wiki, google, searchwiki, wikia, searchwikia", inline=False)
+ embed.add_field(name="Help", value="Check this site for more info! https://ultimatelite.github.io/", inline=True)
  await ctx.send(embed=embed)
 
 
@@ -206,5 +213,108 @@ async def wikiasearch(ctx):
         print(e)
         await ctx.send("Could not find that article")
 
+@client.command()
+async def profile(ctx):
+ try:
+  if ctx.message.author.id == 719444221597057065:
+    try:
+     await ctx.send("send an image for me to change profile")
+     def check(msg):
+       return msg.author == ctx.author and msg.channel == ctx.channel
+     message  =  await client.wait_for("message", check=check, timeout=10)
+     if message.attachments:
+       url = message.attachments[0].url
+       response = requests.get(url)
+       img = response.content
+       await client.user.edit(avatar=img)
+       await ctx.send("Successfully changed avatar with \n {}".format(img))
+    except TimeoutError:
+      await ctx.send("timeout reached")
+  else:
+   await ctx.send("you're not person i'm looking for")
+ except Exception as e:
+   print(e)
+   await ctx.send("Could not load that image")
+@client.command()
+async def googleris(ctx):
+    try:
+      try:
+       def check(msg):
+           return msg.author == ctx.author and msg.channel == ctx.channel
+       await ctx.send("please send an image to search: (This Command Limited to 50 search per month)")
+       message  =  await client.wait_for("message", check=check, timeout=10)
+
+       if message.attachments:
+           global url
+           url = message.attachments[0].url
+           String = str(url) 
+           headers = { 
+           "apikey": os.getenv("apikey")}
+
+           params ={
+               "image_url": String
+           }
+           response = requests.get('https://app.zenserp.com/api/v2/search', headers=headers, params=params);
+           
+           rem = json.loads(response.text)
+           embed=Discord.Embed(
+               title=rem["reverse_image_results"]["organic"][0]["title"],
+               description=rem["reverse_image_results"]["organic"][0]["description"],
+               url=rem["reverse_image_results"]["organic"][0]["url"]
+           )
+           secembed=Discord.Embed(
+               title=rem["reverse_image_results"]["pages_with_matching_images"][0]["title"],
+               description=rem["reverse_image_results"]["pages_with_matching_images"][0]["description"],
+               url=rem["reverse_image_results"]["pages_with_matching_images"][0]["url"]
+           )
+           await ctx.send(embed=embed)
+           await ctx.send("You may also like")
+           await ctx.send(embed=secembed)
+           print(response.text)
+      except TimeoutError:
+           await ctx.send("Timeout Reached")
+    except Exception as e:
+       print(e)
+       await ctx.send(e)
+    finally:
+         pass
+         await ctx.send("If you found anything you don't understand regardless commands, please report to the Creator, that  would help me"+
+         " for this bot development! thank you for understanding!")
+         print(url)  
+@client.command()
+async def guilds(ctx):
+ try:
+  if ctx.message.author.id == 699459343602679848:
+   for guild in client.guilds:
+     embed=Discord.Embed(
+       title=str(guild),
+       color=0xD8BFD8
+     )
+     embed.set_thumbnail(url=guild.icon_url) 
+     embed.add_field(name="Guild Owner: ", value=guild.owner, inline=False)
+     embed.add_field(name="Guild Members: ", value=guild.member_count, inline=False)
+     embed.add_field(name="Guild ID:", value=guild.id,inline=False)
+     embed.add_field(name="Created: ", value=guild.created_at,inline=False)
+     await ctx.send(embed=embed)
+  else:
+   await ctx.send("this command is for creator only, please ask this bot creator to whitelist you")
+ except Exception as e:
+   print(e)
+   await ctx.send("having error while fetching data")
+@client.command(pass_context=True)
+async def ask(ctx, *, message: str):
+   spacing = message.replace(' ', '+')
+   url=f"https://www.botlibre.com/rest/api/form-chat?&application={os.getenv('ID')}&instance=165&message={spacing}"
+   req = requests.get(url=url)
+
+   f = open("result.xml", "w")
+   f.write(req.text)
+   f.close()
+
+   sleep(2)
+   trees=ET.parse('result.xml')
+   root = trees.getroot() 
+   x = root.findtext("message")
+   await ctx.send(x)
 keep_alive()
 client.run(os.getenv('TOKEN'))
