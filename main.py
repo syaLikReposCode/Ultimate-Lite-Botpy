@@ -1,6 +1,4 @@
 import discord as Discord
-import os
-import xml.etree.ElementTree as ET
 import wikipedia
 try:
  from googlesearch import search
@@ -13,7 +11,6 @@ from server import keep_alive
 import requests
 from discord.ext import commands
 import json
-from time import sleep
 
 prefix = "f"
 intents = Discord.Intents.default()  
@@ -212,75 +209,6 @@ async def wikiasearch(ctx):
     except Exception as e:
         print(e)
         await ctx.send("Could not find that article")
-
-@client.command()
-async def profile(ctx):
- try:
-  if ctx.message.author.id == 719444221597057065:
-    try:
-     await ctx.send("send an image for me to change profile")
-     def check(msg):
-       return msg.author == ctx.author and msg.channel == ctx.channel
-     message  =  await client.wait_for("message", check=check, timeout=10)
-     if message.attachments:
-       url = message.attachments[0].url
-       response = requests.get(url)
-       img = response.content
-       await client.user.edit(avatar=img)
-       await ctx.send("Successfully changed avatar with \n {}".format(img))
-    except TimeoutError:
-      await ctx.send("timeout reached")
-  else:
-   await ctx.send("you're not person i'm looking for")
- except Exception as e:
-   print(e)
-   await ctx.send("Could not load that image")
-@client.command()
-async def googleris(ctx):
-    try:
-      try:
-       def check(msg):
-           return msg.author == ctx.author and msg.channel == ctx.channel
-       await ctx.send("please send an image to search: (This Command Limited to 50 search per month)")
-       message  =  await client.wait_for("message", check=check, timeout=10)
-
-       if message.attachments:
-           global url
-           url = message.attachments[0].url
-           String = str(url) 
-           headers = { 
-           "apikey": os.getenv("apikey")}
-
-           params ={
-               "image_url": String
-           }
-           response = requests.get('https://app.zenserp.com/api/v2/search', headers=headers, params=params);
-           
-           rem = json.loads(response.text)
-           embed=Discord.Embed(
-               title=rem["reverse_image_results"]["organic"][0]["title"],
-               description=rem["reverse_image_results"]["organic"][0]["description"],
-               url=rem["reverse_image_results"]["organic"][0]["url"]
-           )
-           secembed=Discord.Embed(
-               title=rem["reverse_image_results"]["pages_with_matching_images"][0]["title"],
-               description=rem["reverse_image_results"]["pages_with_matching_images"][0]["description"],
-               url=rem["reverse_image_results"]["pages_with_matching_images"][0]["url"]
-           )
-           await ctx.send(embed=embed)
-           await ctx.send("You may also like")
-           await ctx.send(embed=secembed)
-           print(response.text)
-      except TimeoutError:
-           await ctx.send("Timeout Reached")
-    except Exception as e:
-       print(e)
-       await ctx.send(e)
-    finally:
-         pass
-         await ctx.send("If you found anything you don't understand regardless commands, please report to the Creator, that  would help me"+
-         " for this bot development! thank you for understanding!")
-         print(url)  
  
 keep_alive()
 client.run(os.getenv('TOKEN'))
